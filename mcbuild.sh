@@ -15,7 +15,7 @@ cp ./configs/dell-vostro-2520.config ./.config
 echo "==> Building .deb packages..."
 #make-kpkg --initrd --append_to_version="-mcdope+`git log -1 --format="%H"`" kernel_image kernel_headers kernel_source
 #make-kpkg --initrd --append_to_version="+`git log -1 --format="%H"`" kernel_image kernel_headers kernel_source
-make-kpkg --initrd --append_to_version="+mcdope-`date +%Y%m%d-%H%M`" kernel_image kernel_headers kernel_source
+make-kpkg --initrd --append_to_version="+mcdope-`date +%Y%m%d-%H%M`" kernel_image kernel_headers kernel_source > build.log 2>&1
 echo ""
 echo ""
 echo "==> DONE!"
