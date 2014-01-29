@@ -1,5 +1,5 @@
 /*
- * BFQ-v6r2 for 3.12.0: data structures and common functions prototypes.
+ * BFQ-v7 for 3.12.0: data structures and common functions prototypes.
  *
  * Based on ideas and code from CFQ:
  * Copyright (C) 2003 Jens Axboe <axboe@kernel.dk>
@@ -19,7 +19,7 @@
 #include <linux/rbtree.h>
 
 #define BFQ_IOPRIO_CLASSES	3
-#define BFQ_CL_IDLE_TIMEOUT	HZ/5
+#define BFQ_CL_IDLE_TIMEOUT	(HZ/5)
 
 #define BFQ_MIN_WEIGHT	1
 #define BFQ_MAX_WEIGHT	1000
@@ -188,8 +188,10 @@ struct bfq_group;
  * @pid: pid of the process owning the queue, used for logging purposes.
  * @last_rais_start_time: last (idle -> weight-raised) transition attempt
  * @raising_cur_max_time: current max raising time for this queue
- * @bic: pointer to the bfq_io_cq owning the bfq_queue, set to %NULL if the
- *	 queue is shared
+ * @last_idle_bklogged: time of the last transition of the @bfq_queue from
+ *                      idle to backlogged
+ * @service_from_backlogged: cumulative service received from the @bfq_queue
+ *                           since the last transition from idle to backlogged
  *
  * A bfq_queue is a leaf request queue; it can be associated to an io_context
  * or more (if it is an async one).  @cgroup holds a reference to the
@@ -233,12 +235,14 @@ struct bfq_queue {
 	sector_t last_request_pos;
 
 	pid_t pid;
-	struct bfq_io_cq *bic;
 
 	/* weight-raising fields */
 	unsigned int raising_cur_max_time;
-	u64 last_rais_start_finish, soft_rt_next_start;
+	unsigned long soft_rt_next_start;
+	u64 last_rais_start_finish;
 	unsigned int raising_coeff;
+	u64 last_idle_bklogged;
+	unsigned long service_from_backlogged;
 };
 
 /**
@@ -260,23 +264,12 @@ struct bfq_ttime {
  * @icq: associated io_cq structure
  * @bfqq: array of two process queues, the sync and the async
  * @ttime: associated @bfq_ttime struct
- * @raising_time_left: snapshot of the time left before weight raising ends
- *		       for the sync queue associated to this process; this
- *		       snapshot is taken to remember this value while the weight
- *		       raising is suspended because the queue is merged with a
- *		       shared queue, and is used to set @raising_cur_max_time
- *		       when the queue is split from the shared queue and its
- *		       weight is raised again
- * @saved_idle_window: same purpose as the previous field for the idle window
  */
 struct bfq_io_cq {
 	struct io_cq icq; /* must be the first member */
 	struct bfq_queue *bfqq[2];
 	struct bfq_ttime ttime;
 	int ioprio;
-
-	unsigned int raising_time_left;
-	unsigned int saved_idle_window;
 };
 
 /**
@@ -288,6 +281,7 @@ struct bfq_io_cq {
  *		have interleaving requests (see bfq_close_cooperator).
  * @busy_queues: number of bfq_queues containing requests (including the
  *		 queue under service, even if it is idling).
+ * @raised_busy_queues: number of weight-raised busy bfq_queues.
  * @queued: number of queued requests.
  * @rq_in_driver: number of requests dispatched and waiting for completion.
  * @sync_flight: number of sync requests in the driver.
@@ -299,8 +293,8 @@ struct bfq_io_cq {
  * @idle_slice_timer: timer set when idling for the next sequential request
  *                    from the queue under service.
  * @unplug_work: delayed work to restart dispatching on the request queue.
- * @active_queue: bfq_queue under service.
- * @active_bic: bfq_io_cq (bic) associated with the @active_queue.
+ * @in_service_queue: bfq_queue under service.
+ * @in_service_bic: bfq_io_cq (bic) associated with the @in_service_queue.
  * @last_position: on-disk position of the last served request.
  * @last_budget_start: beginning of the last budget.
  * @last_idling_start: beginning of the last idle slice.
@@ -339,7 +333,7 @@ struct bfq_io_cq {
  * @bfq_raising_max_softrt_rate: max service-rate for a soft real-time queue,
  *			         sectors per seconds
  * @RT_prod: cached value of the product R*T used for computing the maximum
- * 	     duration of the weight raising automatically
+ *	     duration of the weight raising automatically
  * @oom_bfqq: fallback dummy bfqq for extreme OOM conditions
  *
  * All the fields are protected by the @queue lock.
@@ -352,6 +346,7 @@ struct bfq_data {
 	struct rb_root rq_pos_tree;
 
 	int busy_queues;
+	int raised_busy_queues;
 	int queued;
 	int rq_in_driver;
 	int sync_flight;
@@ -365,8 +360,8 @@ struct bfq_data {
 	struct timer_list idle_slice_timer;
 	struct work_struct unplug_work;
 
-	struct bfq_queue *active_queue;
-	struct bfq_io_cq *active_bic;
+	struct bfq_queue *in_service_queue;
+	struct bfq_io_cq *in_service_bic;
 
 	sector_t last_position;
 
@@ -398,7 +393,7 @@ struct bfq_data {
 	unsigned int bfq_raising_max_time;
 	unsigned int bfq_raising_rt_max_time;
 	unsigned int bfq_raising_min_idle_time;
-	unsigned int bfq_raising_min_inter_arr_async;
+	unsigned long bfq_raising_min_inter_arr_async;
 	unsigned int bfq_raising_max_softrt_rate;
 	u64 RT_prod;
 
@@ -416,8 +411,7 @@ enum bfqq_state_flags {
 	BFQ_BFQQ_FLAG_budget_new,	/* no completion with this budget */
 	BFQ_BFQQ_FLAG_coop,		/* bfqq is shared */
 	BFQ_BFQQ_FLAG_split_coop,	/* shared bfqq will be splitted */
-	BFQ_BFQQ_FLAG_some_coop_idle,   /* some cooperator is inactive */
-	BFQ_BFQQ_FLAG_just_split,	/* queue has just been split */
+	BFQ_BFQQ_FLAG_softrt_update,	/* needs softrt-next-start update */
 };
 
 #define BFQ_BFQQ_FNS(name)						\
@@ -444,8 +438,7 @@ BFQ_BFQQ_FNS(sync);
 BFQ_BFQQ_FNS(budget_new);
 BFQ_BFQQ_FNS(coop);
 BFQ_BFQQ_FNS(split_coop);
-BFQ_BFQQ_FNS(some_coop_idle);
-BFQ_BFQQ_FNS(just_split);
+BFQ_BFQQ_FNS(softrt_update);
 #undef BFQ_BFQQ_FNS
 
 /* Logging facilities. */
