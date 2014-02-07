@@ -16,6 +16,11 @@ echo "==> Building .deb packages..."
 #make-kpkg --initrd --append_to_version="-mcdope+`git log -1 --format="%H"`" kernel_image kernel_headers kernel_source
 #make-kpkg --initrd --append_to_version="+`git log -1 --format="%H"`" kernel_image kernel_headers kernel_source
 make-kpkg --initrd --append_to_version="+mcdope-`date +%Y%m%d-%H%M`" kernel_image kernel_headers kernel_source > build.log 2>&1
+if [ "$1" == "install" ]
+    then
+	echo "==> Installing .deb packages ..."
+	sudo dpkg -i ../linux-*
+fi
 echo ""
 echo ""
 echo "==> DONE!"
