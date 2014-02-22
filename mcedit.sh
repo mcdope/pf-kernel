@@ -1,9 +1,9 @@
 #!/bin/bash
-echo '==> Grabbing config'
-cp configs/dell-vostro-2520.config .config
+echo '==> Grabbing config '$1
+cp $1 .config
 echo '==> make menuconfig'
 make menuconfig
 echo '==> Saving config'
-cp .config configs/dell-vostro-2520.config
+cp .config $1
 echo 'DONE!'
 
