@@ -27,7 +27,8 @@ mccores=`grep -c "cpu cores" /proc/cpuinfo`
 echo -n "==> Building .deb packages with "
 echo -n $mccores
 echo " parallel jobs..."
-make-kpkg -j$mccores --initrd --append_to_version="+mcdope-`date +%Y%m%d-%H%M`" kernel_image kernel_headers kernel_source > build.log 2>&1
+#make-kpkg -j$mccores --initrd --append_to_version="+mcdope-`date +%Y%m%d-%H%M`" kernel_image kernel_headers kernel_source > build.log 2>&1
+make-kpkg -j$mccores --initrd kernel_image kernel_headers kernel_source > build.log 2>&1
 if [ "$1" == "install" ]
     then
 	echo "==> Installing .deb packages ..."
