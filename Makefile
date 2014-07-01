@@ -412,9 +412,10 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-sizeof-pointer-memaccess \
 		   -fgraphite -floop-parallelize-all \
 		   -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block \
-		   -O3 -DNDEBUG -funsafe-loop-optimizations -fsection-anchors \
+		   -O3 -DNDEBUG -funsafe-loop-optimizations \
 		   -fivopts -ftree-loop-im -ftree-loop-ivcanon -ffunction-sections \
 		   -fomit-frame-pointer -fgcse-sm -fgcse-las -fweb -ftracer
+# Unsupported on x86/64 according to gcc: -fsection-anchors
 # DONT BOOT (only quick tested): -fdata-sections -frename-registers -fmodulo-sched -fmodulo-sched-allow-regmoves
 
 KBUILD_AFLAGS_KERNEL :=
