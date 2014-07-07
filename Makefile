@@ -1,8 +1,8 @@
 VERSION = 3
 PATCHLEVEL = 15
-SUBLEVEL = 0
+SUBLEVEL = 4
 EXTRAVERSION = -pf3
-NAME = United Ukraine
+NAME = Shuffling Zombie Juror
 
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
