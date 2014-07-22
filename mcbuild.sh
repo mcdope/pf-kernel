@@ -8,7 +8,8 @@ rm -rf ./debian &> /dev/null
 if [ "$1" == "clean" ] 
 then
 	echo "==> Cleaning source tree..."
-	make mrproper 
+	make mrproper
+	make distclean
 fi
 
 HOST=`hostname`
