@@ -23,6 +23,12 @@ then
 	echo "==> Copying Desktop (ASUS P8-Z77M + i5 3570k) config..."
 	cp ./configs/mcdope-desktop.config ./.config
 fi
+if [ "$HOST" == "pxw-devtop" ] 
+then
+	echo "==> Copying Laptop (Tuxedo BC1503) config..."
+	cp ./configs/tuxedo-bc1503.config ./.config
+fi
+
 
 mccores=`grep -c "cpu cores" /proc/cpuinfo`
 echo -n "==> Building .deb packages with "
