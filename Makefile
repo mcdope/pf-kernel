@@ -1,6 +1,6 @@
 VERSION = 4
 PATCHLEVEL = 1
-SUBLEVEL = 0
+SUBLEVEL = 3
 EXTRAVERSION = -pf1
 NAME = Casted by bike
 
@@ -398,10 +398,21 @@ LINUXINCLUDE    := \
 KBUILD_CPPFLAGS := -D__KERNEL__
 
 KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
-		   -fno-strict-aliasing -fno-common \
-		   -Werror-implicit-function-declaration \
-		   -Wno-format-security \
-		   -std=gnu89
+                   -fno-strict-aliasing -fno-common \
+                   -Werror-implicit-function-declaration \
+                   -Wno-format-security \
+                   -std=gnu89 \
+                   $(call cc-option,-fno-delete-null-pointer-checks,) \
+                   -funswitch-loops -fpredictive-commoning -fgcse-after-reload \
+                   -Wno-sizeof-pointer-memaccess \
+                   -fgraphite -floop-parallelize-all \
+                   -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block \
+                   -O3 -DNDEBUG -funsafe-loop-optimizations \
+                   -fivopts -ftree-loop-im -ftree-loop-ivcanon \
+                   -fomit-frame-pointer -fgcse-sm -fgcse-las -fweb -ftracer
+# Unsupported on x86/64 according to gcc: -fsection-anchors
+# DONT BOOT (only quick tested): -fdata-sections -frename-registers -fmodulo-sched -fmodulo-sched-allow-regmoves
+# DONT COMPILE (Vivid, GCC 4.9.2, Haswell): -ffunction-sections
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
