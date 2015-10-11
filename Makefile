@@ -391,7 +391,20 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
-		   -std=gnu89
+		   -std=gnu89 \
+		   $(call cc-option,-fno-delete-null-pointer-checks,) \
+		   -fgcse-after-reload -fgcse-sm -fgcse-las \
+		   -fgraphite -fpredictive-commoning \
+		   -ftree-loop-im -ftree-loop-ivcanon  \
+		   -funswitch-loops  -funsafe-loop-optimizations -floop-parallelize-all -floop-strip-mine -floop-block \
+		   -O3 -fivopts -fomit-frame-pointer -fweb 
+
+# Removed for 4.2: -floop-interchange <-- same as -ftree-loop-linear according to gcc docs (https://gcc.gnu.org/onlinedocs/gcc-4.9.3/gcc/Optimize-Options.html#Optimize-Options)
+# Removed for 4.2, 'red' on http://www.gentoo-wiki.info/CFLAGS_matrix: -ftree-loop-linear -ftracer
+# Removed for 4.2: -Wno-sizeof-pointer-memaccess -DNDEBUG 
+# Unsupported on x86/64 according to gcc: -fsection-anchors
+# DONT BOOT (only quick tested): -fdata-sections -frename-registers -fmodulo-sched -fmodulo-sched-allow-regmoves
+# DONT COMPILE (Vivid, GCC 4.9.2, Haswell): -ffunction-sections
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
