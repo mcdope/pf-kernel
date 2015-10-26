@@ -1,7 +1,7 @@
 VERSION = 4
 PATCHLEVEL = 2
-SUBLEVEL = 3
-EXTRAVERSION = -pf2
+SUBLEVEL = 4
+EXTRAVERSION = -pf3
 NAME = Provocatively misleading information
 
 # *DOCUMENTATION*
