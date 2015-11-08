@@ -1,6 +1,6 @@
 VERSION = 4
 PATCHLEVEL = 2
-SUBLEVEL = 4
+SUBLEVEL = 5
 EXTRAVERSION = -pf3
 NAME = Provocatively misleading information
 
