@@ -1,7 +1,7 @@
 VERSION = 4
 PATCHLEVEL = 3
-SUBLEVEL = 2
-EXTRAVERSION = -pf2
+SUBLEVEL = 3
+EXTRAVERSION = -pf3
 NAME = Provoking Unhealthy Discussions
 
 # *DOCUMENTATION*
