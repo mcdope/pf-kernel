@@ -17,6 +17,6 @@ echo 192.168.1.101 > remote_ip
 # set local network device name (find it trough ifconfig, examples: eth0, eno1, wlan0)
 echo eth0 > dev_name
 # find destination MAC address
-arping $(cat remote_ip) -f | grep -o ..:..:..:..:..:.. > remote_mac
+arping -I $(cat dev_name) $(cat remote_ip) -f | grep -o ..:..:..:..:..:.. > remote_mac
 
 echo 1 > enabled
