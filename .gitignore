@@ -99,6 +99,7 @@ GTAGS
 extra_certificates
 signing_key.priv
 signing_key.x509
+signing_key.pem
 x509.genkey
 
 # Kconfig presets
@@ -108,3 +109,6 @@ all.config
 *.kdev4
 
 build.log
+
+# Ignore "thrown away" configs
+*.config-*
