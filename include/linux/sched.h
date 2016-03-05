@@ -828,6 +828,7 @@ struct user_struct {
 	unsigned long mq_bytes;	/* How many bytes can be allocated to mqueue? */
 #endif
 	unsigned long locked_shm; /* How many pages of mlocked shm ? */
+	unsigned long unix_inflight;	/* How many files in flight in unix sockets */
 
 #ifdef CONFIG_KEYS
 	struct key *uid_keyring;	/* UID specific keyring */
@@ -1407,6 +1408,7 @@ struct task_struct {
 	int smt_bias; /* Policy/nice level bias across smt siblings */
 #endif
 	u64 cached;		/* task cached indicator */
+	u64 policy_stick_timeout;
 	u64 policy_cached_timeout;
 	unsigned long rt_timeout;
 #else /* CONFIG_SCHED_BFS */
