@@ -36,7 +36,6 @@
 modules.builtin
 Module.symvers
 *.dwo
-*.su
 
 #
 # Top-level generic files
@@ -45,7 +44,6 @@ Module.symvers
 /TAGS
 /linux
 /vmlinux
-/vmlinux.32
 /vmlinux-gdb.py
 /vmlinuz
 /System.map
@@ -91,9 +89,6 @@ GRTAGS
 GSYMS
 GTAGS
 
-# id-utils files
-ID
-
 *.orig
 *~
 \#*#
@@ -102,9 +97,9 @@ ID
 # Leavings from module signing
 #
 extra_certificates
-signing_key.pem
 signing_key.priv
 signing_key.x509
+signing_key.pem
 x509.genkey
 
 # Kconfig presets
@@ -112,3 +107,8 @@ all.config
 
 # Kdevelop4
 *.kdev4
+
+build.log
+
+# Ignore "thrown away" configs
+*.config-*
