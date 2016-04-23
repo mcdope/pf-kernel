@@ -26,7 +26,8 @@ fi
 if [ "$HOST" == "pxw-devtop" ] 
 then
 	echo "==> Copying Laptop (Tuxedo BC1503) config..."
-	cp ./configs/tuxedo-bc1503.config ./.config
+	#cp ./configs/tuxedo-bc1503.config ./.config
+	cp ./configs/tuxedo-bc1503-xanmod-based.config ./.config
 fi
 
 
